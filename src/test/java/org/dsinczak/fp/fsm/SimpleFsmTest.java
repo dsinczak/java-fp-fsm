@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 public class SimpleFsmTest {
 
@@ -29,6 +29,15 @@ public class SimpleFsmTest {
             when(States.A,
                     matchMessageEquals("go to B", (msg, data) -> goTo(States.B).using("went from A to B"))
                             .matchMessage(String.class, (msg, data) -> "go to C".equals(msg), (msg, data) -> goTo(States.C).using("went from A to C"))
+            );
+
+            when(States.B,
+                    matchMessageEquals("go to C", (msg, data) -> goTo(States.B).using("went from B to C"))
+            );
+
+            when(States.C,
+                    matchMessageEquals("go to A", (msg, data) -> goTo(States.A).using("went from C to A"))
+                            .matchMessage(String.class, (msg, data) -> "go to NotSupported".equals(msg), (msg, data) -> goTo(States.NotSupported).using("should not happen"))
             );
 
             onStateChange(
@@ -55,6 +64,69 @@ public class SimpleFsmTest {
         public Set<Object> getUnhandledMessages() {
             return unhandledMessages;
         }
+    }
+
+    @Test
+    public void shouldStartWithInitialState() {
+        // When
+        var fsm = new Fsm();
+
+        // Then
+        assertThat(fsm.stateType()).isEqualTo(States.A);
+        assertThat(fsm.stateData()).isEqualTo("init state A");
+    }
+
+    @Test
+    public void shouldChangeStateWithMessageEqualityMatcher() {
+        // Given
+        var fsm = new Fsm();
+
+        // When
+        fsm.handle("go to B");
+
+        // Then
+        assertThat(fsm.stateType()).isEqualTo(States.B);
+        assertThat(fsm.stateData()).isEqualTo("went from A to B");
+        assertThat(fsm.getStateChanges()).contains("Went from A to B");
+    }
+
+    @Test
+    public void shouldChangeStateWithMessageTypePredicateMatcher() {
+        // Given
+        var fsm = new Fsm();
+
+        // When
+        fsm.handle("go to C");
+
+        // Then
+        assertThat(fsm.stateType()).isEqualTo(States.C);
+        assertThat(fsm.stateData()).isEqualTo("went from A to C");
+        assertThat(fsm.getStateChanges()).contains("Went from A to C");
+    }
+
+    @Test
+    public void shouldPassUnhandledMessageToWhenUnhandled() {
+        // Given
+        var fsm = new Fsm();
+
+        // When
+        fsm.handle("dead end");
+
+        // Then
+        assertThat(fsm.getUnhandledMessages()).contains("dead end");
+    }
+
+    @Test
+    public void shouldFailToGoToUndefinedStateAkaDeadEnd() {
+        // Given
+        var fsm = new Fsm();
+        fsm.handle("go to C");
+
+        // When / Then
+        assertThatThrownBy(() -> fsm.handle("go to NotSupported"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Transition to state NotSupported impossible. No such state defined.");
+
     }
 
     @Test
