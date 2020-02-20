@@ -34,20 +34,20 @@ public class PartialFunctionBuilder<T, R> {
     }
 
     public <P> PartialFunctionBuilder<T, R> matchEquals(final P other, final Function<P, R> apply) {
-        append(new CaseStatement<T,P,R>(o->o.equals(other), apply));
+        append(new CaseStatement<T, P, R>(o -> o.equals(other), apply));
         return this;
     }
 
     public <P> PartialFunctionBuilder<T, R> matchAny(final Function<P, R> apply) {
-        append(new CaseStatement<T,P,R>(o->true, apply));
+        append(new CaseStatement<T, P, R>(o -> true, apply));
         return this;
     }
 
     public PartialFunction<T, R> build() {
         PartialFunction<T, R> empty = PartialFunctions.empty();
-        if (this.pf == null) return empty;
         // This way we always return PF that in the end has no domain
-        else return new OrElse<>(pf, empty);
+        if (this.pf == null) return empty;
+        else return pf.orElse(empty);
     }
 
     @SuppressWarnings("unchecked")
@@ -60,9 +60,9 @@ public class PartialFunctionBuilder<T, R> {
     @SuppressWarnings("unchecked")
     PartialFunctionBuilder<T, R> matchUnchecked(final Class<?> type, final Predicate<?> predicate, final Function<?, R> apply) {
         Predicate<Object> p = o -> {
-                    if (!type.isInstance(o)) return false;
-                    else return ((Predicate<Object>) predicate).test(o);
-                };
+            if (!type.isInstance(o)) return false;
+            else return ((Predicate<Object>) predicate).test(o);
+        };
         append(new CaseStatement<T, Object, R>(p, (Function<Object, R>) apply));
         return this;
     }
