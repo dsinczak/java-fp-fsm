@@ -1,4 +1,4 @@
-package org.dsinczak.fp.pf;
+package org.dsinczak.fp.func;
 
 import java.util.function.Function;
 import java.util.function.Predicate;

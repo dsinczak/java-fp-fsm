@@ -1,15 +1,14 @@
-package org.dsinczak.fp.pf;
+package org.dsinczak.fp.func;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface PartialFunction<T,R> extends Function<T,R> {
+public interface PartialFunction<T, R> extends Function<T, R> {
     /**
      * Applies this function to the given argument and returns the result.
      *
      * @param t the argument
      * @return the result of function application
-     *
      */
     R apply(T t);
 
@@ -25,9 +24,13 @@ public interface PartialFunction<T,R> extends Function<T,R> {
      * Lifts this partial function into a total function that returns an {@code Optional} result.
      *
      * @return a function that applies arguments to this function and returns {@code Optional.of(result)}
-     *         if the function is defined for the given arguments, and {@code Optional.empty()} otherwise.
+     * if the function is defined for the given arguments, and {@code Optional.empty()} otherwise.
      */
     default Function<T, Optional<R>> lift() {
-        return t -> isDefinedAt(t)?Optional.of(apply(t)):Optional.empty();
+        return t -> isDefinedAt(t) ? Optional.of(apply(t)) : Optional.empty();
+    }
+
+    default PartialFunction<T, R> orElse(PartialFunction<T, R> partialFunction) {
+        return new OrElse<>(this, partialFunction);
     }
 }

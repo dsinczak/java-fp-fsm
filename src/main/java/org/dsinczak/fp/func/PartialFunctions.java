@@ -1,4 +1,5 @@
-package org.dsinczak.fp.pf;
+package org.dsinczak.fp.func;
+
 
 public abstract class PartialFunctions {
     private PartialFunctions() {

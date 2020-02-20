@@ -92,6 +92,10 @@ public abstract class FiniteStateMachine<S, D> {
         return new State<>(nextStateName, currentState.stateData);
     }
 
+    protected final State<S, D> stay() {
+        return goTo(currentState.stateType);
+    }
+
     private void handleMessage(Message<D> message) {
         var newState = findStateChangeFunction(message)
                 .map(sf -> sf.apply(message))
@@ -162,6 +166,10 @@ class State<S, D> {
     State(S stateType, D stateData) {
         this.stateType = stateType;
         this.stateData = stateData;
+    }
+
+    public State<S,D> using(D nextStateData) {
+        return new State<>(stateType, nextStateData);
     }
 
     @Override

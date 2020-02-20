@@ -1,4 +1,5 @@
-package org.dsinczak.fp.pf;
+package org.dsinczak.fp.func;
+
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -45,8 +46,8 @@ public class PartialFunctionBuilder<T, R> {
     public PartialFunction<T, R> build() {
         PartialFunction<T, R> empty = PartialFunctions.empty();
         if (this.pf == null) return empty;
-            // This way we always return PF that in the end has no domain
-        else return new OrElsePartialFunction<>(pf, empty);
+        // This way we always return PF that in the end has no domain
+        else return new OrElse<>(pf, empty);
     }
 
     @SuppressWarnings("unchecked")
@@ -68,7 +69,7 @@ public class PartialFunctionBuilder<T, R> {
 
     void append(PartialFunction<T, R> another) {
         if (pf == null) pf = another;
-        else pf = new OrElsePartialFunction<>(pf, another);
+        else pf = new OrElse<>(pf, another);
     }
 
 }
