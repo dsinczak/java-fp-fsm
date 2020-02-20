@@ -14,6 +14,10 @@ public class SimpleFsmTest {
     static class FsmNotInitialized extends FiniteStateMachineDsl<States, String> {
     }
 
+    static class FsmInitializedWithNoState extends FiniteStateMachineDsl<States, String> {
+        { initialize(); }
+    }
+
     static class Fsm extends FiniteStateMachineDsl<States, String> {
 
         private Set<String> stateChanges = new HashSet<>();
@@ -64,9 +68,9 @@ public class SimpleFsmTest {
     }
 
     @Test
-    public void test() {
-        var fsm = new Fsm();
-
-
+    public void shouldFailToInitializedFsmWithoutInitialState() {
+        assertThatThrownBy(FsmInitializedWithNoState::new)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("No initial state was set.");
     }
 }

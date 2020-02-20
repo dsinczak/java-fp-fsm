@@ -1,6 +1,5 @@
 package org.dsinczak.fp.func;
 
-
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -31,5 +30,25 @@ public interface PartialFunction2<T, P, R> extends BiFunction<T, P, R> {
      */
     default BiFunction<T, P, Optional<R>> lift() {
         return (t, p) -> isDefinedAt(t, p) ? Optional.of(apply(t, p)) : Optional.empty();
+    }
+
+    /**
+     * Folds partial function from two arguments to one where argument is tuple of
+     * arguments.
+     *
+     * @return tupled partial function
+     */
+    default PartialFunction<Tuple2<T, P>, R> tupled() {
+        return new PartialFunction<>() {
+            @Override
+            public R apply(Tuple2<T, P> tp) {
+                return PartialFunction2.this.apply(tp.getA(), tp.getB());
+            }
+
+            @Override
+            public boolean isDefinedAt(Tuple2<T, P> tp) {
+                return PartialFunction2.this.isDefinedAt(tp.getA(), tp.getB());
+            }
+        };
     }
 }

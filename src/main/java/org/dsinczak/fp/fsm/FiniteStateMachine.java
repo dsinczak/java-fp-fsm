@@ -13,6 +13,8 @@ public abstract class FiniteStateMachine<S, D> {
 
     private static final Logger LOG = LoggerFactory.getLogger(FiniteStateMachine.class);
 
+    private boolean initialized = false;
+
     private State<S, D> currentState;
     private State<S, D> nextState;
 
@@ -36,7 +38,7 @@ public abstract class FiniteStateMachine<S, D> {
 
     public final void handle(Object o) {
         Objects.requireNonNull(o, "FSM message must not be null");
-        if (this.currentState == null) {
+        if (!initialized || this.currentState == null) {
             throw new IllegalStateException("Finite state machine is not initialized. No initial state was set.");
         }
         var msg = new Message<>(o, this.currentState.stateData);
@@ -44,8 +46,12 @@ public abstract class FiniteStateMachine<S, D> {
     }
 
     public final void initialize() {
+        if (initialized) throw new IllegalStateException("FSM is already initialized. Do not call initialize() twice");
+
         if (currentState != null) changeState(currentState);
-        else throw new IllegalArgumentException("No initial state was set.");
+        else throw new IllegalStateException("No initial state was set.");
+
+        this.initialized = true;
     }
 
     public final State<S, D> state() {
@@ -159,38 +165,4 @@ class Message<D> {
     }
 }
 
-class State<S, D> {
-    S stateType;
-    D stateData;
 
-    State(S stateType, D stateData) {
-        this.stateType = stateType;
-        this.stateData = stateData;
-    }
-
-    public State<S,D> using(D nextStateData) {
-        return new State<>(stateType, nextStateData);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof State)) return false;
-        State<?, ?> state = (State<?, ?>) o;
-        return Objects.equals(stateType, state.stateType) &&
-                Objects.equals(stateData, state.stateData);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(stateType, stateData);
-    }
-
-    @Override
-    public String toString() {
-        return "State{" +
-                "stateType=" + stateType +
-                ", stateData=" + stateData +
-                '}';
-    }
-}
