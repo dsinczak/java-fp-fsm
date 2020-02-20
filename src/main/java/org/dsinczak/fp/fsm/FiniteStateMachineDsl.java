@@ -30,4 +30,12 @@ public class FiniteStateMachineDsl<S, D> extends FiniteStateMachine<S, D> {
         super.registerUnhandledStateChangeFunction(builder.build());
     }
 
+    ////////////////////////////////////
+
+    final <MT, DT extends D> StateChangeFunctionBuilder<S, D> matchMessage(
+            Class<MT> messageType,
+            Class<DT> dataType
+    ) {
+        return null;
+    }
 }

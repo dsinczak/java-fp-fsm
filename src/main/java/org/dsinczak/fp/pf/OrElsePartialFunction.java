@@ -1,7 +1,5 @@
 package org.dsinczak.fp.pf;
 
-import io.vavr.PartialFunction;
-
 public final class OrElsePartialFunction<T,R> implements PartialFunction<T,R> {
 
     private PartialFunction<T,R> first;
@@ -16,10 +14,8 @@ public final class OrElsePartialFunction<T,R> implements PartialFunction<T,R> {
     public R apply(T t) {
         if (first.isDefinedAt(t)) {
             return first.apply(t);
-        } else if (second.isDefinedAt(t)) {
-            return second.apply(t);
         } else {
-            throw new IllegalArgumentException("Partial function not defined for " + t + " check isDefinedAt before apply");
+            return second.apply(t);
         }
     }
 

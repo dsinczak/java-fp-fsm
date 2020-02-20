@@ -1,7 +1,7 @@
 package org.dsinczak.fp.fsm;
 
-import io.vavr.PartialFunction;
 import org.dsinczak.fp.pf.OrElsePartialFunction;
+import org.dsinczak.fp.pf.PartialFunction;
 
 public interface StateChangeFunction<S, D> extends PartialFunction<Message<D>, State<S, D>> {
 

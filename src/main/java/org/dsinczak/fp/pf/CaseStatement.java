@@ -1,7 +1,5 @@
 package org.dsinczak.fp.pf;
 
-import io.vavr.PartialFunction;
-
 import java.util.function.Function;
 import java.util.function.Predicate;
 

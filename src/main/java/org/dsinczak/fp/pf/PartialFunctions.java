@@ -1,7 +1,5 @@
 package org.dsinczak.fp.pf;
 
-import io.vavr.PartialFunction;
-
 public abstract class PartialFunctions {
     private PartialFunctions() {
     }

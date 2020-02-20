@@ -28,7 +28,7 @@ public class PartialFunctionBuilderTest {
 
         assertThat(pf.isDefinedAt(Double.MAX_VALUE)).isEqualTo(false);
 
-        assertThatThrownBy(()->pf.apply(Double.MAX_VALUE)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(()->pf.apply(Double.MAX_VALUE)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

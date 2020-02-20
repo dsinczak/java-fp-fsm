@@ -1,9 +1,5 @@
 package org.dsinczak.fp.fsm;
 
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
-import io.vavr.control.Option;
-import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +95,7 @@ public abstract class FiniteStateMachine<S, D> {
     private void handleMessage(Message<D> message) {
         var newState = findStateChangeFunction(message)
                 .map(sf -> sf.apply(message))
-                .getOrElse(() -> unhandledStateChangeFunction.apply(message));
+                .orElseGet(() -> unhandledStateChangeFunction.apply(message));
         changeState(newState);
     }
 
@@ -111,26 +107,32 @@ public abstract class FiniteStateMachine<S, D> {
         this.nextState = newState;
         LOG.info("FSM State change from {}, to {}", currentState.stateType, nextState.stateType);
 
-        notifyStateChangeHandlers(Tuple.of(currentState.stateType, nextState.stateType));
+        notifyStateChangeHandlers(currentState.stateType, nextState.stateType);
 
         this.nextState = null;
         this.currentState = newState;
     }
 
-    private void notifyStateChangeHandlers(Tuple2<S, S> stateChange) {
+    private void notifyStateChangeHandlers(S fromState, S toState) {
         stateChangeHandlers.stream()
-                .filter(h -> h.isDefinedAt(stateChange))
-                .forEach(h -> Try.of(() -> h.apply(stateChange)).onFailure(th -> LOG.error("Error running state change handler", th)));
+                .filter(h -> h.isDefinedAt(fromState, toState))
+                .forEach(h -> {
+                    try {
+                        h.apply(fromState, toState);
+                    } catch (Exception e) {
+                        LOG.error("Error running state change handler", e);
+                    }
+                });
     }
 
-    private Option<StateChangeFunction<S, D>> findStateChangeFunction(Message<D> message) {
+    private Optional<StateChangeFunction<S, D>> findStateChangeFunction(Message<D> message) {
         if (stateChangeFunctions.containsKey(currentState.stateType)) {
             var fnc = stateChangeFunctions.get(currentState.stateType);
             if (fnc.isDefinedAt(message)) {
-                return Option.of(fnc);
+                return Optional.of(fnc);
             }
         }
-        return Option.none();
+        return Optional.empty();
     }
 
 }
